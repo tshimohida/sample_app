@@ -18,6 +18,11 @@ describe User do #クラスを渡してクラスのテストをしている
 
   it { should be_valid }
 
+  #参考
+  # it "should respond to 'name'" do
+  # 	expect(@user).to respond_to(:name)
+  # end
+
   describe "名前が存在しない場合" do
   	before { @user.name = " " }
     it { should_not be_valid }
@@ -51,6 +56,16 @@ describe User do #クラスを渡してクラスのテストをしている
         @user.email = valid_address
         expect(@user).to be_valid
       end
+    end
+  end
+
+  describe "混在ケースと電子メールアドレス" do
+    let(:mixed_case_email) { "Foo@ExAMPle.CoM" }
+
+    it "すべて小文字として保存する必要があり" do
+      @user.email = mixed_case_email
+      @user.save
+      expect(@user.reload.email).to eq mixed_case_email.downcase
     end
   end
 
