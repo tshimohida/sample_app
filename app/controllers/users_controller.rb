@@ -4,9 +4,11 @@ class UsersController < ApplicationController
   	@user = User.find(params[:id])
   end
 
+
   def new
   	@user = User.new
   end
+
 
   def create
     #@user = User.new(params[:user])    # 実装は終わっていないことに注意!
@@ -20,6 +22,7 @@ class UsersController < ApplicationController
       render 'new'
     end
   end
+
 
   private
 

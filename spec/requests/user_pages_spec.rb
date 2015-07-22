@@ -5,14 +5,14 @@ describe "User pages" do
 
   subject { page }
 
-  describe "signup page" do
+  describe "サインアップ　ページ" do
     before { visit signup_path }
 
     it { should have_content('Sign up') }
     it { should have_title(full_title('Sign up')) }
   end
 
-  describe "profile page" do
+  describe "プロフィール　ページ" do
 	  # ユーザー変数を作成するためのコードに置き換える。
 	  let(:user) { FactoryGirl.create(:user) }
 	  before { visit user_path(user) }
@@ -21,7 +21,7 @@ describe "User pages" do
 	  it { should have_title(user.name) }
 	end
 
-  describe "signup" do
+  describe "サインあっぷ" do
 
     before { visit signup_path }
 
