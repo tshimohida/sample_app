@@ -16,7 +16,10 @@ describe User do #クラスを渡してクラスのテストをしている
   it { should respond_to(:password) }
   it { should respond_to(:password_confirmation) }
   it { should respond_to(:remember_token) }
+
   it { should respond_to(:admin) }
+  it { should respond_to(:microposts) }
+  it { should respond_to(:feed) }
 
   it { should be_valid }
   it { should_not be_admin }
@@ -54,10 +57,12 @@ describe User do #クラスを渡してクラスのテストをしている
     it "should be invalid" do
       addresses = %w[user@foo,com user_at_foo.org example.user@foo.
                      foo@bar_baz.com foo@bar+baz.com]
+
       addresses.each do |invalid_address|
         @user.email = invalid_address
         expect(@user).not_to be_valid
       end
+
     end
   end
 
@@ -112,11 +117,11 @@ describe User do #クラスを渡してクラスのテストをしている
 
   describe "認証メソッドの戻り値" do
   	before { @user.save }
- 	let(:found_user) { User.find_by(email: @user.email) }
+ 	  let(:found_user) { User.find_by(email: @user.email) }
 
  	 describe "有効なパスワードを持ちました" do
    		it { should eq found_user.authenticate(@user.password) }
-  	 end
+  	end
 
 	  describe "無効なパスワードを使用して、" do
 	    let(:user_for_invalid_password) { found_user.authenticate("invalid") }
@@ -124,12 +129,47 @@ describe User do #クラスを渡してクラスのテストをしている
 	    it { should_not eq user_for_invalid_password }
 	    specify { expect(user_for_invalid_password).to be_false }
 	  end
-
-  end
+ end
 
   describe "remember token" do
     before { @user.save }
     its(:remember_token) { should_not be_blank }
   end
 
+  describe "micropost associations" do
+
+    before { @user.save }
+    let!(:older_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago)
+    end
+
+    let!(:newer_micropost) do
+      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago)
+    end
+
+    it "should have the right microposts in the right order" do
+      expect(@user.microposts.to_a).to eq [newer_micropost, older_micropost]
+    end
+
+    it "should destroy associated microposts" do
+      microposts = @user.microposts.to_a
+      @user.destroy
+      expect(microposts).not_to be_empty
+
+      microposts.each do |micropost|
+        expect(Micropost.where(id: micropost.id)).to be_empty
+      end
+    end
+
+    describe "status" do
+      let(:unfollowed_post) do
+        FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
+      end
+
+      its(:feed) { should include(newer_micropost) }
+      its(:feed) { should include(older_micropost) }
+      its(:feed) { should_not include(unfollowed_post) }
+    end
+  end
 end
+
